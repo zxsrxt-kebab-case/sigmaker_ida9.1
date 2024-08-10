@@ -4,8 +4,9 @@
 
 bool IS_ARM = false;
 
+// patch for ida 9.x
 static bool IsARM( ) {
-	return std::string_view( "ARM" ) == inf.procname;
+	return std::string_view( "ARM" ) == inf_get_procname().c_str( );
 }
 
 static bool GetOperandOffsetARM( const insn_t& instruction, uint8_t* operandOffset, uint8_t* operandLength ) {
@@ -72,31 +73,34 @@ static bool GetOperand( const insn_t& instruction, uint8_t* operandOffset, uint8
 	return false;
 }
 
-static std::vector<ea_t> FindSignatureOccurences( std::string_view idaSignature, bool skipMoreThanOne = false ) {
-	// Convert signature string to searchable struct
+// patch for ida 9.x
+static std::vector<ea_t> FindSignatureOccurences( std::string_view idaSignature, bool skipMoreThanOne = false )
+{
 	compiled_binpat_vec_t binaryPattern;
-	parse_binpat_str( &binaryPattern, inf.min_ea, idaSignature.data( ), 16 );
+	parse_binpat_str( &binaryPattern, inf_get_min_ea( ), idaSignature.data( ), 16 );
 
-	// Search for occurences
 	std::vector<ea_t> results;
-	auto ea = inf.min_ea;
-	while( true ) {
-		auto occurence = bin_search2( ea, inf.max_ea, binaryPattern, BIN_SEARCH_NOCASE | BIN_SEARCH_FORWARD );
 
-		// Signature not found anymore
-		if( occurence == BADADDR ) {
+	auto ea = inf_get_min_ea( );
+	while ( true )
+	{
+		auto occurrence = bin_search3( ea, inf_get_max_ea( ), binaryPattern, BIN_SEARCH_NOCASE | BIN_SEARCH_FORWARD );
+
+		if ( occurrence == BADADDR )
+		{
 			break;
 		}
 
-		//  In case we only care about uniqueness, return after more than one result
-		if( skipMoreThanOne && results.size( ) > 1 ) {
+		if ( skipMoreThanOne && results.size( ) > 1 )
+		{
 			break;
 		}
 
-		results.push_back( occurence );
+		results.push_back( occurrence );
 
-		ea = occurence + 1;
+		ea = occurrence + 1;
 	}
+
 	return results;
 }
 
