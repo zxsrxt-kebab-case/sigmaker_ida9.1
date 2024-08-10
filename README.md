@@ -1,8 +1,8 @@
 # IDA Pro Sigmaker for 9.X
-Signature Maker Plugin for IDA Pro >= 9.X
+Signature Maker Plugin for IDA Pro/Any >= 9.X
 
 ## Requirements
-- IDA Pro Plugin SDK 9.X, Only tested for 9.X, unsure if older versions work
+- IDA Pro/Any Plugin SDK 9.X, Only tested for 9.X, unsure if older versions work
 
 ## Installation
 Drop into plugins folder of your IDA installation.
