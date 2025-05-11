@@ -84,7 +84,7 @@ static std::vector<ea_t> FindSignatureOccurences( std::string_view idaSignature,
 	auto ea = inf_get_min_ea( );
 	while ( true )
 	{
-		auto occurrence = bin_search3( ea, inf_get_max_ea( ), binaryPattern, BIN_SEARCH_NOCASE | BIN_SEARCH_FORWARD );
+		auto occurrence = bin_search( ea, inf_get_max_ea( ), binaryPattern, BIN_SEARCH_NOCASE | BIN_SEARCH_FORWARD );
 
 		if ( occurrence == BADADDR )
 		{
