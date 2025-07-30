@@ -1,0 +1,8 @@
+//
+// Created by Мираль on 31.07.2025.
+//
+
+#ifndef SIGMAKER_MACOS_SDK_COMPAT_HPP
+#define SIGMAKER_MACOS_SDK_COMPAT_HPP
+
+#endif //SIGMAKER_MACOS_SDK_COMPAT_HPP
