@@ -2,11 +2,14 @@
 #include "Utils.h"
 #include "SignatureUtils.h"
 
+#include <cinttypes>
+
 bool IS_ARM = false;
 
 // patch for ida 9.x
 static bool IsARM( ) {
-	return std::string_view( "ARM" ) == inf_get_procname().c_str( );
+    const char* procname = inf_get_procname().c_str();
+    return procname && std::string_view("ARM") == procname;
 }
 
 static bool GetOperandOffsetARM( const insn_t& instruction, uint8_t* operandOffset, uint8_t* operandLength ) {
@@ -136,9 +139,9 @@ static std::expected<Signature, std::string> GenerateUniqueSignatureForEA( ea_t 
 				return std::unexpected( "Failed to decode first instruction" );
 			}
 
-			msg( "Signature reached end of executable code @ %I64X\n", currentAddress );
+			msg( "Signature reached end of executable code @ %" PRIX64 "\n", currentAddress );
 			auto signatureString = BuildIDASignatureString( signature );
-			msg( "NOT UNIQUE Signature for %I64X: %s\n", ea, signatureString.c_str( ) );
+			msg( "NOT UNIQUE Signature for %" PRIX64 ": %s\n", ea, signatureString.c_str( ) );
 			return std::unexpected( "Signature not unique" );
 		}
 
@@ -152,7 +155,7 @@ static std::expected<Signature, std::string> GenerateUniqueSignatureForEA( ea_t 
 				else if( result == 0 ) { // No
 					// Print the signature we have so far, even though its not unique
 					auto signatureString = BuildIDASignatureString( signature );
-					msg( "NOT UNIQUE Signature for %I64X: %s\n", ea, signatureString.c_str( ) );
+                    msg( "NOT UNIQUE Signature for %" PRIX64 ": %s\n", ea, signatureString.c_str( ) );
 					return std::unexpected( "Signature not unique" );
 				}
 				else { // Cancel
@@ -229,7 +232,7 @@ static std::expected<Signature, std::string> GenerateSignatureForEARange( ea_t e
 				return std::unexpected( "Failed to decode first instruction" );
 			}
 
-			msg( "Signature reached end of executable code @ %I64X\n", currentAddress );
+			msg( "Signature reached end of executable code @ %" PRIX64 "\n", currentAddress );
 			// If we have some bytes left, add them
 			if( currentAddress < eaEnd ) {
 				AddBytesToSignature( signature, currentAddress, eaEnd - currentAddress, false );
@@ -272,7 +275,7 @@ void PrintSignatureForEA( const std::expected<Signature, std::string>& signature
 		return;
 	}
 	const auto signatureStr = FormatSignature( signature.value( ), sigType );
-	msg( "Signature for %I64X: %s\n", ea, signatureStr.c_str( ) );
+	msg( "Signature for %" PRIX64 ": %s\n", ea, signatureStr.c_str( ) );
 	if( !SetClipboardText( signatureStr ) ) {
 		msg( "Failed to copy to clipboard!" );
 	}
@@ -332,11 +335,11 @@ static void PrintXRefSignaturesForEA( ea_t ea, const std::vector<std::tuple<ea_t
 	}
 
 	auto topLength = std::min( topCount, xrefSignatures.size( ) );
-	msg( "Top %llu Signatures out of %llu xrefs for %I64X:\n", topLength, xrefSignatures.size( ), ea );
+	msg( "Top %llu Signatures out of %llu xrefs for %:\n", topLength, xrefSignatures.size( ), ea );
 	for( size_t i = 0; i < topLength; i++ ) {
 		const auto& [originAddress, signature] = xrefSignatures[i];
 		const auto signatureStr = FormatSignature( signature, sigType );
-		msg( "XREF Signature #%i @ %I64X: %s\n", i + 1, originAddress, signatureStr.c_str( ) );
+		msg( "XREF Signature #%i @ %" PRIX64 ": %s\n", i + 1, originAddress, signatureStr.c_str( ) );
 
 		// Copy first signature only
 		if( i == 0 ) {
@@ -356,7 +359,7 @@ static void PrintSelectedCode( ea_t start, ea_t end, SignatureType sigType, bool
 	}
 
 	const auto signatureStr = FormatSignature( signature.value( ), sigType );
-	msg( "Code for %I64X-%I64X: %s\n", start, end, signatureStr.c_str( ) );
+	msg( "Code for %" PRIX64 "-%" PRIX64 ": %s\n", start, end, signatureStr.c_str( ) );
 	SetClipboardText( signatureStr );
 }
 
@@ -390,7 +393,7 @@ static void SearchSignatureString( std::string input ) {
 		if( GetRegexMatches( input, std::regex( R"(\\x(?:[0-9A-F]{2}))" ), rawByteStrings ) && rawByteStrings.size( ) == stringMask.length( ) ) {
 			Signature convertedSignature;
 			for( size_t i = 0; const auto & m : rawByteStrings ) {
-				SignatureByte b{ std::stoi( m.substr( 2 ), nullptr, 16 ), stringMask[i++] == '?' };
+				SignatureByte b{ static_cast<uint8_t>(std::stoi( m.substr( 2 ), nullptr, 16 )), stringMask[i++] == '?' };
 				convertedSignature.push_back( b );
 			}
 			convertedSignatureString = BuildIDASignatureString( convertedSignature );
@@ -399,7 +402,7 @@ static void SearchSignatureString( std::string input ) {
 		else if( GetRegexMatches( input, std::regex( R"((?:0x(?:[0-9A-F]{2}))+)" ), rawByteStrings ) && rawByteStrings.size( ) == stringMask.length( ) ) {
 			Signature convertedSignature;
 			for( size_t i = 0; const auto & m : rawByteStrings ) {
-				SignatureByte b{ std::stoi( m.substr( 2 ), nullptr, 16 ), stringMask[i++] == '?' };
+				SignatureByte b{ static_cast<uint8_t>(std::stoi( m.substr( 2 ), nullptr, 16 )), stringMask[i++] == '?' };
 				convertedSignature.push_back( b );
 			}
 			convertedSignatureString = BuildIDASignatureString( convertedSignature );
@@ -436,7 +439,7 @@ static void SearchSignatureString( std::string input ) {
 			if( GetRegexMatches( input, std::regex( R"(\\x(?:[0-9A-F]{2}))" ), rawByteStrings ) && rawByteStrings.size( ) > 1 ) {
 				Signature convertedSignature;
 				for( size_t i = 0; const auto & m : rawByteStrings ) {
-					SignatureByte b{ std::stoi( m.substr( 2 ), nullptr, 16 ), false };
+					SignatureByte b{ static_cast<uint8_t>(std::stoi( m.substr( 2 ), nullptr, 16 )), false };
 					convertedSignature.push_back( b );
 				}
 				convertedSignatureString = BuildIDASignatureString( convertedSignature );
@@ -445,7 +448,7 @@ static void SearchSignatureString( std::string input ) {
 			else if( GetRegexMatches( input, std::regex( R"((?:0x(?:[0-9A-F]{2}))+)" ), rawByteStrings ) && rawByteStrings.size( ) > 1 ) {
 				Signature convertedSignature;
 				for( size_t i = 0; const auto & m : rawByteStrings ) {
-					SignatureByte b{ std::stoi( m.substr( 2 ), nullptr, 16 ), false };
+					SignatureByte b{ static_cast<uint8_t>(std::stoi( m.substr( 2 ), nullptr, 16 )), false };
 					convertedSignature.push_back( b );
 				}
 				convertedSignatureString = BuildIDASignatureString( convertedSignature );
@@ -469,7 +472,7 @@ static void SearchSignatureString( std::string input ) {
 		return;
 	}
 	for( const auto& ea : signatureMatches ) {
-		msg( "Match @ %I64X\n", ea );
+		msg( "Match @ %" PRIX64 "\n", ea );
 	}
 }
 

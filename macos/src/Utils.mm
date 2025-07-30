@@ -1,11 +1,25 @@
 #include "Utils.h"
 
+#include <AppKit/NSPasteboard.h>
+#include <Foundation/NSString.h>
+
 bool SetClipboardText( std::string_view text ) {
 	if( text.empty( ) ) {
 		return false;
 	}
 
-	return true;
+    @autoreleasepool {
+
+        NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+
+        [pasteboard clearContents];
+
+        NSString* nsText = [NSString stringWithUTF8String:text.data()];
+
+        return [pasteboard setString:nsText forType:NSPasteboardTypeString];
+    }
+
+    return true;
 }
 
 bool GetRegexMatches( std::string string, std::regex regex, std::vector<std::string>& matches ) {
