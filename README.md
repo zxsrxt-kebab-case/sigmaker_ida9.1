@@ -7,7 +7,7 @@ Signature Maker Plugin for IDA Pro/Any >= 9.X
 ## Installation
 Drop into plugins folder of your IDA installation.
 
-Windows: `%AppData%\Hex-Rays\IDA Pro\plugins`
+Windows: `%AppData%\Hex-Rays\IDA Pro\plugins`__
 MacOs: `/Applications/Ida Pro/Contents/MacOs/plugins/` (untested on arm mac)
 
 
