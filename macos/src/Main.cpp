@@ -7,9 +7,11 @@
 bool IS_ARM = false;
 
 // patch for ida 9.x
-static bool IsARM( ) {
-    const char* procname = inf_get_procname().c_str();
-    return procname && std::string_view("ARM") == procname;
+// Fix for ARM since the old one returns a garbage string
+static bool IsARM() {
+    qstring proc_qstr = inf_get_procname();
+   // msg("[DEBUG] Processor name: '%s'\n", proc_qstr.c_str()); // Debugging line to check processor name
+    return !proc_qstr.empty() && std::string_view("ARM") == proc_qstr.c_str();
 }
 
 static bool GetOperandOffsetARM( const insn_t& instruction, uint8_t* operandOffset, uint8_t* operandLength ) {

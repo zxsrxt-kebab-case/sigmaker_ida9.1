@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 project(sigmaker_macos LANGUAGES CXX)
 
+# Add universal architecture setting
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -20,7 +23,6 @@ add_compile_options(
 )
 
 
-#write here path for ida sdk...
 set(IDA_SDK_PATH "$ENV{HOME}/Desktop/idasdk91")
 if(NOT EXISTS "${IDA_SDK_PATH}/include/ida.hpp")
     message(FATAL_ERROR "IDA SDK not found at ${IDA_SDK_PATH}.")
@@ -49,7 +51,6 @@ target_compile_options(sigmaker_macos PRIVATE
 target_link_options(sigmaker_macos PRIVATE
         -shared
         -undefined dynamic_lookup
-        -Wl
 )
 
 set_target_properties(sigmaker_macos PROPERTIES
