@@ -9,7 +9,7 @@ Drop into plugins folder of your IDA installation.
 
 Windows: `%AppData%\Hex-Rays\IDA Pro\plugins`
 
-MacOs: `/Applications/Ida Pro/Contents/MacOs/plugins/` (untested on arm mac)
+MacOs: `/Applications/Ida Pro/Contents/MacOs/plugins/` (works on both intel/arm)
 
 
 ## Usage
