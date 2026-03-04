@@ -278,9 +278,6 @@ void PrintSignatureForEA( const std::expected<Signature, std::string>& signature
 	}
 	const auto signatureStr = FormatSignature( signature.value( ), sigType );
 	msg( "Signature for %" PRIX64 ": %s\n", ea, signatureStr.c_str( ) );
-	if( !SetClipboardText( signatureStr ) ) {
-		msg( "Failed to copy to clipboard!" );
-	}
 }
 
 static void FindXRefs( ea_t ea, bool wildcardOperands, bool continueOutsideOfFunction, std::vector<std::tuple<ea_t, Signature>>& xrefSignatures, size_t maxSignatureLength, uint32_t operandTypeBitmask ) {
@@ -342,11 +339,6 @@ static void PrintXRefSignaturesForEA( ea_t ea, const std::vector<std::tuple<ea_t
 		const auto& [originAddress, signature] = xrefSignatures[i];
 		const auto signatureStr = FormatSignature( signature, sigType );
 		msg( "XREF Signature #%i @ %" PRIX64 ": %s\n", i + 1, originAddress, signatureStr.c_str( ) );
-
-		// Copy first signature only
-		if( i == 0 ) {
-			SetClipboardText( signatureStr );
-		}
 	}
 }
 
@@ -362,7 +354,6 @@ static void PrintSelectedCode( ea_t start, ea_t end, SignatureType sigType, bool
 
 	const auto signatureStr = FormatSignature( signature.value( ), sigType );
 	msg( "Code for %" PRIX64 "-%" PRIX64 ": %s\n", start, end, signatureStr.c_str( ) );
-	SetClipboardText( signatureStr );
 }
 
 static void SearchSignatureString( std::string input ) {

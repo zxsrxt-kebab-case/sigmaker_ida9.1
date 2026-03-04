@@ -54,14 +54,3 @@ set_target_properties(sigmaker_linux PROPERTIES
         PREFIX "lib"
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output"
 )
-
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-
-target_include_directories(sigmaker_linux PRIVATE
-        ${GTK3_INCLUDE_DIRS}
-)
-
-target_link_libraries(sigmaker_linux PRIVATE
-        ${GTK3_LIBRARIES}
-)
